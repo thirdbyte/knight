@@ -114,12 +114,16 @@ It needs four repository secrets:
 Set them from a checkout that has the keystore, so the values never pass
 through a browser or a terminal history:
 
-```bash
-gh secret set KEYSTORE_BASE64 < <(base64 -i knight-release.jks)
-gh secret set KEYSTORE_PASSWORD --body "$(sed -n 's/^storePassword=//p' keystore.properties)"
-gh secret set KEY_ALIAS --body "$(sed -n 's/^keyAlias=//p' keystore.properties)"
-gh secret set KEY_PASSWORD --body "$(sed -n 's/^keyPassword=//p' keystore.properties)"
+```sh
+base64 -i knight-release.jks | tr -d '\n' | gh secret set KEYSTORE_BASE64
+sed -n 's/^storePassword=//p' keystore.properties | tr -d '\n' | gh secret set KEYSTORE_PASSWORD
+sed -n 's/^keyAlias=//p' keystore.properties | tr -d '\n' | gh secret set KEY_ALIAS
+sed -n 's/^keyPassword=//p' keystore.properties | tr -d '\n' | gh secret set KEY_PASSWORD
 ```
+
+Piping rather than redirecting keeps these working in any shell. `tr -d '\n'`
+matters: a trailing newline inside a password secret is invisible and turns
+into a signing failure that reads like a wrong password.
 
 To cut a release: bump `versionCode` and `versionName` in
 `app/build.gradle.kts`, commit, then

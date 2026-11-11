@@ -1,0 +1,20 @@
+# Signing material. Losing these means no upgrade can ever install over a
+# release built with them, so they are kept out of the repository and backed
+# up elsewhere.
+knight-release.jks
+keystore.properties
+
+# Build output
+.gradle/
+.kotlin/
+build/
+local.properties
+*.apk
+*.aab
+
+# Reference material that belongs to Hero, not to this project. The spec in
+# XTREME-125R-CONSOLE-BLE-SPEC.md carries everything learned from them.
+Hero App.apk
+Xtreme-125R-*.pdf
+
+.DS_Store

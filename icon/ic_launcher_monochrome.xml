@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Knight app icon, monochrome layer for themed icons on Android 13+.
+     res/drawable/ic_launcher_monochrome.xml
+     The fill colour is replaced by the system at draw time; the value here
+     only matters for previews. Same geometry as the foreground. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M54,30C41.3,30 32,39.3 32,52V62C32,71 38,78 46.5,78H61.5C70,78 76,71 76,62V52C76,39.3 66.7,30 54,30ZM42.5,46H65.5A4.5,4.5 0 0 1 65.5,55H42.5A4.5,4.5 0 0 1 42.5,46Z" />
+</vector>

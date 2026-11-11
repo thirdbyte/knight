@@ -15,16 +15,16 @@ jobs:
     name: Test and build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       # No signing credentials here on purpose. A pull request from a fork
       # cannot read secrets, and this job does not need them: the debug build
@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew :app:assembleDebug
 
       - name: Keep the APK for inspection
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: knight-debug
           path: app/build/outputs/apk/debug/app-debug.apk

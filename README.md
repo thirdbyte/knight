@@ -88,6 +88,48 @@ Without them the release build still compiles but comes out unsigned. **Keep
 that keystore.** An APK signed by a different key cannot upgrade one already
 installed; Android makes you uninstall first, which clears the saved console.
 
+## CI
+
+Two workflows.
+
+`ci.yml` runs the protocol tests and builds a debug APK on every push to main
+and every pull request. It uses no secrets, so a pull request from a fork works
+normally.
+
+`release.yml` runs when a `v*` tag is pushed. It refuses to start without
+signing credentials, because an unsigned APK cannot upgrade an installed build
+and shipping one would be worse than shipping nothing. It then checks the tag
+against `versionName`, builds, verifies the APK really is signed, and attaches
+`knight-<version>.apk` to a GitHub release.
+
+It needs four repository secrets:
+
+| Secret | What it holds |
+|---|---|
+| `KEYSTORE_BASE64` | `knight-release.jks`, base64 encoded |
+| `KEYSTORE_PASSWORD` | the `storePassword` from `keystore.properties` |
+| `KEY_ALIAS` | the `keyAlias`, which is `knight` |
+| `KEY_PASSWORD` | the `keyPassword` |
+
+Set them from a checkout that has the keystore, so the values never pass
+through a browser or a terminal history:
+
+```bash
+gh secret set KEYSTORE_BASE64 < <(base64 -i knight-release.jks)
+gh secret set KEYSTORE_PASSWORD --body "$(sed -n 's/^storePassword=//p' keystore.properties)"
+gh secret set KEY_ALIAS --body "$(sed -n 's/^keyAlias=//p' keystore.properties)"
+gh secret set KEY_PASSWORD --body "$(sed -n 's/^keyPassword=//p' keystore.properties)"
+```
+
+To cut a release: bump `versionCode` and `versionName` in
+`app/build.gradle.kts`, commit, then
+
+```bash
+git tag -a v1.2 -m "Knight 1.2" && git push origin v1.2
+```
+
+The tag and `versionName` must agree or the workflow stops before building.
+
 ## Layout
 
 ```

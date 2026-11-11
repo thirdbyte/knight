@@ -61,7 +61,7 @@ This drives a **Telematics Control Unit**, not the cluster: `DataConstants.java`
 | `CommonFeatureMusic` | the above + music metadata/transport |
 | `Navigation` | the above + turn-by-turn |
 
-The Feb-2024 Xtreme 125R manual lists exactly: BT icon, incoming call alert, missed call alert, message alert, phone battery status. That is the `CommonFeatures` set, 1:1.
+`CommonFeatures` is 1:1 with what this cluster actually displays: BT icon, incoming call alert, missed call alert, message alert, phone battery status.
 
 `bleName` also comes from the backend; the scanner filters on **the first 5 characters** of it (`BluetoothScanService.java:301-313`).
 
@@ -69,9 +69,9 @@ The Feb-2024 Xtreme 125R manual lists exactly: BT icon, incoming call alert, mis
 `JAU02_78A4` on MAC `74:46:B3:B9:78:A4`. So the shape is
 `<model>_<last two bytes of the MAC>`, and the model part is **not** `HERO` —
 `JAU02` is the five-character model code the backend hands the app, which is
-exactly what that first-5-characters filter is matching. The manual's pairing
-screenshot shows a different model's name, which is why an earlier draft of this
-document wrongly claimed the prefix was `HERO_`.
+exactly what that first-5-characters filter is matching. An earlier draft of
+this document wrongly claimed the prefix was `HERO_`, generalising from another
+model's advertised name.
 
 Do not match on the model prefix. Match the MAC tail:
 
@@ -154,11 +154,11 @@ Key constants:
 
 ### 2.3 Bonding
 
-The service does **not** call `createBond()` explicitly. It connects GATT; the console's characteristics require encryption, so Android raises pairing itself. The console then displays a 6-digit passkey which the user types into the phone — this matches the manual (console shows "pairing pin", app shows a "Pair" dialog).
+The service does **not** call `createBond()` explicitly. It connects GATT; the console's characteristics require encryption, so Android raises pairing itself. The console then displays a 6-digit passkey which the user types into the phone. Confirmed on the bike: the cluster shows the pin, Android raises its own pairing dialog.
 
 A `BondStateReceiver` watches `android.bluetooth.device.action.BOND_STATE_CHANGED` and gates service discovery on `getBondState() == BOND_BONDED (12)`.
 
-**Autopairing** (manual p.32) is just: remember the MAC, re-scan with a `ScanFilter.setDeviceAddress(mac)`, reconnect. `reScanForAutoConnect()` + `getMacAddressFilter()`. Scan settings used: `SCAN_MODE_BALANCED(2)`, `CALLBACK_TYPE_ALL_MATCHES(1)`, `MATCH_MODE_AGGRESSIVE(1)`, legacy = true, PHY = 255.
+**Autopairing** is just: remember the MAC, re-scan with a `ScanFilter.setDeviceAddress(mac)`, reconnect. `reScanForAutoConnect()` + `getMacAddressFilter()`. Scan settings used: `SCAN_MODE_BALANCED(2)`, `CALLBACK_TYPE_ALL_MATCHES(1)`, `MATCH_MODE_AGGRESSIVE(1)`, legacy = true, PHY = 255.
 
 ---
 
@@ -213,9 +213,9 @@ All from `SendDataToCluster.java`.
   | 60–79 | `3` |
   | ≥80 | `4` |
 
-  This 5-level bucket is what produces the manual's **"Low Batt"** alert — the console renders bucket `0` as the low-battery warning rather than showing a percentage.
+  This 5-level bucket is what produces the cluster's **"Low Batt"** alert — the console renders bucket `0` as the low-battery warning rather than showing a percentage.
 
-- `networkLevel` — one char `0`–`4`, from `SignalStrength.getLevel()` obtained by **reflection** (`DashboardWrapper.java:753`). Send `'0'` if you don't want to implement it; the 125R console does not display signal strength anyway (the manual confirms network strength is app-only).
+- `networkLevel` — one char `0`–`4`, from `SignalStrength.getLevel()` obtained by **reflection** (`DashboardWrapper.java:753`). Send `'0'` if you don't want to implement it; the 125R console does not display signal strength at all.
 - `userName` — raw, truncated to 15 chars, **not** padded in the `CommonFeatures` tier. (Only `CommonFeatureMusic` pads it to 18.)
 - The app sends this packet **twice**, via `Handler.postDelayed` at **+2000 ms** and **+5000 ms**, as crude retransmission.
 
@@ -320,7 +320,7 @@ results at all:
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 ```
 
-The Hero app takes route B, which is why its manual tells you to turn GPS on.
+The Hero app takes route B, which is why it asks for location.
 Route A is strictly better for this use case: BLE scan results are never used to
 derive position here.
 
@@ -376,11 +376,12 @@ It bit-packs RTC hours/minutes/seconds together with battery %, signal strength 
 
 **But** this lives in the OTC/TCU stack (§1b), which the Xtreme 125R does not use. The `ride_guide` cluster protocol has **no time opcode** — the complete opcode set is `{2, 3, 5, 6, 7, 9, nav}` and that is exhaustive: a repo-wide grep shows `SendDataToCluster` and `NavigateFragment` are the **only two** classes in the entire APK that write to the TIO RX characteristic.
 
-The manual agrees — p.24 documents setting the clock with the console's own Mode/Set buttons.
+Nothing in the APK writes a clock value to this cluster. The clock is set from
+the console's own Mode and Set buttons.
 
 ### 7.2 Brightness: not available over BLE, anywhere
 
-No brightness-related command exists in either stack. `BleFunc`'s complete public surface (navigation, call state, music volume, battery, BT enable, time) has nothing for display brightness. The manual (p.26) sets brightness in 20% steps via the Mode button, with the vehicle under 3 km/h — a local-only UI.
+No brightness-related command exists in either stack. `BleFunc`'s complete public surface (navigation, call state, music volume, battery, BT enable, time) has nothing for display brightness. Brightness is set from the console's own Mode button while the vehicle is nearly stationary, a local-only UI with no BLE surface.
 
 ### 7.3 Where undiscovered capability could still hide
 

@@ -13,8 +13,9 @@ local.properties
 *.aab
 
 # Reference material that belongs to Hero, not to this project. The spec in
-# XTREME-125R-CONSOLE-BLE-SPEC.md carries everything learned from them.
+# XTREME-125R-CONSOLE-BLE-SPEC.md carries everything learned from them, in
+# this project's own words.
 Hero App.apk
-Xtreme-125R-*.pdf
+*.pdf
 
 .DS_Store

@@ -50,7 +50,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("release")
+            // Unset rather than empty when there are no credentials, so a
+            // checkout without keystore.properties still builds. It produces
+            // an unsigned APK, which the release workflow refuses to publish.
+            signingConfig = if (signing.containsKey("storeFile")) {
+                signingConfigs.getByName("release")
+            } else {
+                null
+            }
         }
     }
 

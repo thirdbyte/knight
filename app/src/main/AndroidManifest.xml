@@ -7,8 +7,8 @@
       neverForLocation is load bearing. Without it Android 12 and up require
       ACCESS_FINE_LOCATION alongside BLUETOOTH_SCAN and silently return no scan
       results, which is exactly what happened before this flag was added. The
-      Hero app takes the other route and asks for location, which is why its
-      manual tells you to turn GPS on. Knight never needs it.
+      Hero app takes the other route and asks for location. Knight never
+      needs it.
     -->
     <uses-permission
         android:name="android.permission.BLUETOOTH_SCAN"
